@@ -161,7 +161,7 @@ class DatasetList(Resource):
             for mapping in body['mappings']:
                 mapping_id = self._datasets_service.create_mapping(mapping['name'], mapping['description'],
                                                                    mapping['aliases'], mapping['tasks'])
-                mapping_ids.append(mapping_id)
+                mapping_ids.append(str(mapping_id))
             self._datasets_service.update_mappings(dataset_id, mapping_ids)
 
         # FIXME: generate uri properly (how?)
