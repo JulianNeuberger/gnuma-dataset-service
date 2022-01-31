@@ -149,8 +149,20 @@ class DatasetList(Resource):
         dataset_description = ''
         if 'description' in body:
             dataset_description = body['description']
-        dataset_id = self._datasets_service.create(dataset_name, dataset_description)
+        dataset_id = self._datasets_service.create_dataset(dataset_name, dataset_description)
         dataset_id = dataset_id.hex
+
+        if 'documents' in body:
+            for document in body['documents']:
+                self._datasets_service.add_document_to_dataset(dataset_id, document)
+
+        if 'mappings' in body:
+            mapping_ids = []
+            for mapping in body['mappings']:
+                mapping_id = self._datasets_service.create_mapping(mapping['name'], mapping['description'],
+                                                                   mapping['aliases'], mapping['tasks'])
+                mapping_ids.append(mapping_id)
+            self._datasets_service.update_mappings(dataset_id, mapping_ids)
 
         # FIXME: generate uri properly (how?)
         return jsonify({

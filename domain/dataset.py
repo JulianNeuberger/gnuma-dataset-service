@@ -5,10 +5,16 @@ from eventsourcing.domain import Aggregate, AggregateCreated, AggregateEvent
 
 
 class Dataset(Aggregate):
-    def __init__(self, name, description: Optional[str] = ''):
+    def __init__(self, name, description: Optional[str] = '', field_mappings: Optional[List[UUID]] = None):
         self.name = name
         self.description = description
         self.contained_documents: List[str] = []
+
+        if field_mappings is None:
+            self.field_mappings: List[UUID] = []
+        else:
+            self.field_mappings = field_mappings
+
         self.deleted = False
 
     @classmethod
@@ -26,6 +32,9 @@ class Dataset(Aggregate):
 
     def update_meta(self, name: str, description: str):
         self.trigger_event(self.MetaDataUpdatedEvent, name=name, description=description)
+
+    def update_mappings(self, mappings: List[UUID]):
+        self.trigger_event(self.MappingsUpdatedEvent, mappings=mappings)
 
     def delete(self):
         self.trigger_event(self.Deleted)
@@ -67,3 +76,9 @@ class Dataset(Aggregate):
         def apply(self, dataset: 'Dataset') -> None:
             dataset.name = self.name
             dataset.description = self.description
+
+    class MappingsUpdatedEvent(AggregateEvent):
+        mappings: List[UUID]
+
+        def apply(self, dataset: 'Dataset') -> None:
+            dataset.field_mappings = self.mappings
