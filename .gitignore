@@ -1,3 +1,5 @@
 .idea/
 test.sqlite
+config.ini
+
 __pycache__/
