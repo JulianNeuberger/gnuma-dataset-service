@@ -84,7 +84,7 @@ class Dataset(Resource):
         mappings = self._datasets_service.get_mappings_for_dataset(dataset)
 
         train_test_split = request.args.get('testSplit', type=float)
-        train_validate_split = request.args.get('validSplit', type=float)
+        train_validate_split = request.args.get('validationSplit', type=float)
         k_folds = request.args.get('kFolds', type=int)
         seed = request.args.get('seed', type=str)
 
