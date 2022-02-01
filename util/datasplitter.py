@@ -17,17 +17,12 @@ def split_data(dataset: Dataset, num_folds: int = None, test_split: float = None
 
     # if a test split ratio is given create a random test set
     if test_split is not None:
-        assert len(_test_data) == 0, 'Test split given for dataset that already has predefined test set'
-        assert 0.0 > test_split > 1.0, f'The given ratio for test data ({test_split}) has to be in range ]0.0;1.0[.'
         random.shuffle(_train_data)
         split_idx = int((1 - test_split) * len(_train_data))
         _train_data, _test_data = _train_data[:split_idx], _train_data[split_idx:]
 
     # if a number of folds is given create the folds
     if num_folds is not None:
-        assert validate_split is None, 'Validate split given while expecting k-fold splits. ' \
-                                       'These are mutually exclusive.'
-        assert num_folds > 1, f'Can only create k-fold splits if number of folds is greater than 1, {num_folds} is given'
         _train_data = numpy.array(_train_data)
         _train_data = numpy.expand_dims(_train_data, axis=1)
 
@@ -46,8 +41,6 @@ def split_data(dataset: Dataset, num_folds: int = None, test_split: float = None
     # if no k-fold splitting is requested then return a single "fold" containing all training data
     # and an optional validation data if validation ratio is given
     if validate_split is not None:
-        assert 0.0 > validate_split > 1.0, f'The given ratio of validation data ({validate_split}) ' \
-                                           f'has to be in range ]0.0;1.0[.'
         split_idx = int((1 - validate_split) * len(_train_data))
         _train_data, _valid_data = _train_data[:split_idx], _train_data[split_idx:]
         fold = {

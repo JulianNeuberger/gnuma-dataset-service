@@ -4,7 +4,8 @@ from typing import Iterable
 from eventsourcing.application import AggregateNotFound
 from flask import request, jsonify
 from flask_restful import abort, Resource
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, ValidationError
+from marshmallow.validate import Range
 
 from interface.service import DatasetsService
 from serializer import serialize_dataset
@@ -69,9 +70,12 @@ class DebugDocumentRemover(Resource):
 
 
 class DatasetQuerySchema(Schema):
-    k_folds = fields.Integer(strict=True, required=False)
-    train_test_split = fields.Float(strict=True, required=False)
-    train_validate_split = fields.Float(strict=True, required=False)
+    k_folds = fields.Integer(strict=False, required=False, data_key='kFolds', validate=Range(min=1))
+    test_split = fields.Float(strict=True, required=False, data_key='testSplit',
+                              validate=Range(min=0.0, max=1.0, min_inclusive=False, max_inclusive=False))
+    validation_split = fields.Float(strict=True, required=False, data_key='validationSplit',
+                                    validate=Range(min=0.0, max=1.0, min_inclusive=False, max_inclusive=False))
+    seed = fields.String(strict=False, required=False,  data_key='seed')
 
 
 class Dataset(Resource):
@@ -83,12 +87,22 @@ class Dataset(Resource):
         dataset = self._datasets_service.get_dataset(dataset_id)
         mappings = self._datasets_service.get_mappings_for_dataset(dataset)
 
-        train_test_split = request.args.get('testSplit', type=float)
-        train_validate_split = request.args.get('validationSplit', type=float)
-        k_folds = request.args.get('kFolds', type=int)
-        seed = request.args.get('seed', type=str)
+        try:
+            params = DatasetQuerySchema().load(request.args)
+        except ValidationError as e:
+            return e.messages, 400
 
-        return jsonify(serialize_dataset(dataset, mappings, k_folds, train_test_split, train_validate_split, seed).to_dict())
+        if params.get('test_split') is not None and len(dataset.test_documents) > 0:
+            return 'Got a test split ratio of document with predefined test set.', 400
+
+        if params.get('validation_split') is not None and params.get('k_folds') is not None:
+            return 'Both a validation and a k-fold split is requested, these are mutually exclusive.', 400
+
+        hal_document = serialize_dataset(dataset, mappings,
+                                         params.get('k_folds'), params.get('test_split'),
+                                         params.get('validation_split'), params.get('seed'))
+
+        return jsonify(hal_document.to_dict())
 
     def patch(self, dataset_id):
         if not request.is_json:
