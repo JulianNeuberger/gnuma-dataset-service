@@ -73,8 +73,9 @@ class Dataset(Resource):
         self._datasets_service = datasets_service
 
     def get(self, dataset_id):
-        dataset = self._datasets_service.get_one(dataset_id)
-        return jsonify(serialize_dataset(dataset).to_dict())
+        dataset = self._datasets_service.get_dataset(dataset_id)
+        mappings = self._datasets_service.get_mappings_for_dataset(dataset)
+        return jsonify(serialize_dataset(dataset, mappings).to_dict())
 
     def patch(self, dataset_id):
         if not request.is_json:
@@ -83,7 +84,7 @@ class Dataset(Resource):
         body = request.json
 
         try:
-            dataset = self._datasets_service.get_one(dataset_id)
+            dataset = self._datasets_service.get_dataset(dataset_id)
         except AggregateNotFound:
             return abort(404)
 
@@ -97,7 +98,7 @@ class Dataset(Resource):
             description = body.get('description', None)
             self._datasets_service.update_meta(dataset_id, name, description)
 
-        dataset = self._datasets_service.get_one(dataset_id)
+        dataset = self._datasets_service.get_dataset(dataset_id)
 
         # TODO: here would be a good time to snapshot (?)
 
@@ -129,7 +130,7 @@ class DatasetList(Resource):
         self._datasets_service = datasets_service
 
     def get(self):
-        datasets = self._datasets_service.get_all()
+        datasets = self._datasets_service.get_all_datasets()
 
         return jsonify([
             serialize_dataset(dataset).to_dict()

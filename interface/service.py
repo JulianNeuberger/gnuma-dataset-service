@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Iterable
 from uuid import UUID
 
 from eventsourcing.system import SingleThreadedRunner
@@ -8,6 +8,7 @@ from application.datasets import Datasets
 from application.indices import ByDocumentIndices, DatasetIndices
 from application.mappings import Mappings
 from domain.dataset import Dataset
+from domain.mapping import Mapping
 from util import logwrapper
 
 
@@ -33,19 +34,31 @@ class DatasetsService:
         logwrapper.info(f'Dataset service [{hex(id(self))}]: Shutting down dataset microservice...')
         self._runner.stop()
 
-    def get_one(self, dataset_id: str) -> Dataset:
+    def get_dataset(self, dataset_id: str) -> Dataset:
         logwrapper.info(f'Dataset service [{hex(id(self))}]: Loading dataset with id {dataset_id}...')
         dataset_id = UUID(dataset_id)
         datasets = self._runner.get(Datasets)
         return datasets.get_dataset(dataset_id)
 
     # FIXME: paginate result
-    def get_all(self) -> List[Dataset]:
+    def get_all_datasets(self) -> List[Dataset]:
         logwrapper.info(f'Dataset service [{hex(id(self))}]: Loading all datasets...')
         indices = self._runner.get(DatasetIndices)
         datasets = self._runner.get(Datasets)
         dataset_ids = indices.get_all_dataset_ids()
         return [datasets.get_dataset(dataset_id) for dataset_id in dataset_ids]
+
+    def get_mapping(self, mapping_id: str) -> Mapping:
+        mappings = Mappings()
+        return mappings.get_mapping(UUID(mapping_id))
+
+    def get_mappings(self, mapping_ids: List[str]) -> Iterable[Mapping]:
+        mappings = Mappings()
+        return mappings.get_mappings([UUID(m) for m in mapping_ids])
+
+    def get_mappings_for_dataset(self, dataset: Dataset) -> Iterable[Mapping]:
+        mappings = Mappings()
+        return mappings.get_mappings([m for m in dataset.field_mappings])
 
     def create_dataset(self, dataset_name: str, dataset_description: str = '') -> UUID:
         datasets = self._runner.get(Datasets)
@@ -54,7 +67,7 @@ class DatasetsService:
         return dataset_id
 
     def create_mapping(self, name: str, description: str, aliases: List[str], tasks: List[str]) -> UUID:
-        mappings = self._runner.get(Mappings)
+        mappings = Mappings()
         mapping_id = mappings.create_mapping(name, description, aliases, tasks)
         logwrapper.info(f'Dataset service [{hex(id(self))}]: Created new mapping with id {mapping_id}...')
         return mapping_id
