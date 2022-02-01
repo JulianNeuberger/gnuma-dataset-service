@@ -73,8 +73,9 @@ class Dataset(Resource):
         self._datasets_service = datasets_service
 
     def get(self, dataset_id):
-        dataset = self._datasets_service.get_one(dataset_id)
-        return jsonify(serialize_dataset(dataset).to_dict())
+        dataset = self._datasets_service.get_dataset(dataset_id)
+        mappings = self._datasets_service.get_mappings_for_dataset(dataset)
+        return jsonify(serialize_dataset(dataset, mappings).to_dict())
 
     def patch(self, dataset_id):
         if not request.is_json:
@@ -83,7 +84,7 @@ class Dataset(Resource):
         body = request.json
 
         try:
-            dataset = self._datasets_service.get_one(dataset_id)
+            dataset = self._datasets_service.get_dataset(dataset_id)
         except AggregateNotFound:
             return abort(404)
 
@@ -97,7 +98,7 @@ class Dataset(Resource):
             description = body.get('description', None)
             self._datasets_service.update_meta(dataset_id, name, description)
 
-        dataset = self._datasets_service.get_one(dataset_id)
+        dataset = self._datasets_service.get_dataset(dataset_id)
 
         # TODO: here would be a good time to snapshot (?)
 
@@ -129,7 +130,7 @@ class DatasetList(Resource):
         self._datasets_service = datasets_service
 
     def get(self):
-        datasets = self._datasets_service.get_all()
+        datasets = self._datasets_service.get_all_datasets()
 
         return jsonify([
             serialize_dataset(dataset).to_dict()
@@ -149,8 +150,20 @@ class DatasetList(Resource):
         dataset_description = ''
         if 'description' in body:
             dataset_description = body['description']
-        dataset_id = self._datasets_service.create(dataset_name, dataset_description)
+        dataset_id = self._datasets_service.create_dataset(dataset_name, dataset_description)
         dataset_id = dataset_id.hex
+
+        if 'documents' in body:
+            for document in body['documents']:
+                self._datasets_service.add_document_to_dataset(dataset_id, document)
+
+        if 'mappings' in body:
+            mapping_ids = []
+            for mapping in body['mappings']:
+                mapping_id = self._datasets_service.create_mapping(mapping['name'], mapping['description'],
+                                                                   mapping['aliases'], mapping['tasks'])
+                mapping_ids.append(str(mapping_id))
+            self._datasets_service.update_mappings(dataset_id, mapping_ids)
 
         # FIXME: generate uri properly (how?)
         return jsonify({

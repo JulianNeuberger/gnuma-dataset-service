@@ -1,3 +1,4 @@
+import configparser
 import os
 
 from flask import Flask
@@ -7,16 +8,26 @@ from flask_restful import Api
 from dispatcher import MessageDispatcher
 from interface.service import DatasetsService
 from messages.listener import AMQPListener
-from resources import Dataset, DatasetList, DebugDocumentRemover
+from resources import Dataset, DatasetList
+from util import logwrapper
 
 if __name__ == '__main__':
+    config = configparser.ConfigParser()
+    config_location = f'{os.path.dirname(os.path.abspath(__file__))}{os.path.sep}config.ini'
+    if not os.path.exists(config_location):
+        logwrapper.error(f'No config file at {config_location}. Make sure to copy config.ini.template to config.ini '
+                         f'and adjust it according to your environment.')
+        raise ValueError(f'No config file found at {config_location}')
+    logwrapper.warning(f'Reading configuration from {config_location}')
+    config.read(config_location)
+
     # event sourcing configuration
     os.environ["INFRASTRUCTURE_FACTORY"] = "eventsourcing.postgres:Factory"
-    os.environ["POSTGRES_DBNAME"] = "ai4eventsourcing"
-    os.environ["POSTGRES_HOST"] = "127.0.0.1"
-    os.environ["POSTGRES_PORT"] = "5433"
-    os.environ["POSTGRES_USER"] = "ai4eventsourcing"
-    os.environ["POSTGRES_PASSWORD"] = "ai4eventsourcing"
+    os.environ["POSTGRES_DBNAME"] = config['postgresql']['database']
+    os.environ["POSTGRES_HOST"] = config['postgresql']['host']
+    os.environ["POSTGRES_PORT"] = config['postgresql']['port']
+    os.environ["POSTGRES_USER"] = config['postgresql']['user']
+    os.environ["POSTGRES_PASSWORD"] = config['postgresql']['pass']
     os.environ["POSTGRES_CONN_MAX_AGE"] = "10"
     os.environ["POSTGRES_PRE_PING"] = "y"
     os.environ["POSTGRES_LOCK_TIMEOUT"] = "5"
@@ -36,8 +47,13 @@ if __name__ == '__main__':
     api.add_resource(Dataset, '/datasets/<dataset_id>', resource_class_kwargs={'datasets_service': datasets_service})
     api.add_resource(DatasetList, '/datasets', resource_class_kwargs={'datasets_service': datasets_service})
 
-    # FIXME: get credentials from config file
-    listener = AMQPListener('h2826957.stratoserver.net', 5672, 'rabbitmqtest', 'rabbitmqtest', dispatcher.dispatch)
+    listener = AMQPListener(
+        host=config['rabbitmq']['host'],
+        port=int(config['rabbitmq']['port']),
+        username=config['rabbitmq']['user'],
+        password=config['rabbitmq']['pass'],
+        on_message=dispatcher.dispatch
+    )
     listener.start()
 
     app.run(debug=True, use_reloader=False)

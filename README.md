@@ -4,7 +4,7 @@
 
 ### Requirements
 
-1. PostgreSQL 13.4, available [here](https://www.postgresql.org/download/)
+1. PostgreSQL 13, available [here](https://www.postgresql.org/download/)
 4. conda 4.9, e.g. the Miniconda [installation](https://conda.io/miniconda.html) 
 
 ### Setup

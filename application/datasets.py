@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 
 from eventsourcing.application import Application
@@ -37,4 +37,9 @@ class Datasets(Application):
         if description is None:
             description = dataset.description
         dataset.update_meta(name, description)
+        self.save(dataset)
+
+    def update_mappings(self, dataset_id: UUID, mappings: List[UUID]):
+        dataset: Dataset = self.repository.get(dataset_id)
+        dataset.update_mappings(mappings)
         self.save(dataset)
