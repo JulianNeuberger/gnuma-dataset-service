@@ -189,12 +189,10 @@ class DatasetList(Resource):
         dataset_id = dataset_id.hex
 
         if 'trainDocuments' in body:
-            for document in body['trainDocuments']:
-                self._datasets_service.add_train_document_to_dataset(dataset_id, document)
+            self._datasets_service.add_train_documents_to_dataset(dataset_id, body['trainDocuments'])
 
         if 'testDocuments' in body:
-            for document in body['testDocuments']:
-                self._datasets_service.add_test_document_to_dataset(dataset_id, document)
+            self._datasets_service.add_test_documents_to_dataset(dataset_id, body['testDocuments'])
 
         if 'mappings' in body:
             mapping_ids = []

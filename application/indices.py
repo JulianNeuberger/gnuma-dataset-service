@@ -15,20 +15,21 @@ class ByDocumentIndices(ProcessApplication):
     def policy(self, domain_event: AggregateEvent, process_event: ProcessEvent) -> None:
         pass
 
-    @policy.register(Dataset.TestDocumentAddedEvent)
-    @policy.register(Dataset.TrainDocumentAddedEvent)
+    @policy.register(Dataset.TestDocumentsAddedEvent)
+    @policy.register(Dataset.TrainDocumentsAddedEvent)
     def _add_document_to_index(self,
-                               domain_event: Union[Dataset.TrainDocumentAddedEvent, Dataset.TestDocumentAddedEvent],
+                               domain_event: Union[Dataset.TrainDocumentsAddedEvent, Dataset.TestDocumentsAddedEvent],
                                process_event: ProcessEvent):
-        assert isinstance(domain_event, Dataset.TrainDocumentAddedEvent) or \
-               isinstance(domain_event, Dataset.TestDocumentAddedEvent)
-        index_id = ByDocumentIndex.create_id(domain_event.document_id)
-        try:
-            index: ByDocumentIndex = self.repository.get(index_id)
-        except AggregateNotFound:
-            index: ByDocumentIndex = ByDocumentIndex.create(domain_event.document_id)
-        index.add_dataset_to_index(domain_event.dataset_id)
-        process_event.save(index)
+        assert isinstance(domain_event, Dataset.TrainDocumentsAddedEvent) or \
+               isinstance(domain_event, Dataset.TestDocumentsAddedEvent)
+        for document_id in domain_event.document_ids:
+            index_id = ByDocumentIndex.create_id(document_id)
+            try:
+                index: ByDocumentIndex = self.repository.get(index_id)
+            except AggregateNotFound:
+                index: ByDocumentIndex = ByDocumentIndex.create(document_id)
+            index.add_dataset_to_index(domain_event.dataset_id)
+            process_event.save(index)
 
     @policy.register(Dataset.SingleDocumentOfTypeRemovedEvent)
     @policy.register(Dataset.AllDocumentsOfTypeRemovedEvent)
