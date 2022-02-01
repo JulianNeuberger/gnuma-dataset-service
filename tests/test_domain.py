@@ -9,23 +9,23 @@ class TestDatasetAggregate(TestCase):
     def test_dataset_can_be_managed(self):
         dataset = Dataset.create()
         self.assertEqual(dataset.version, 1)
-        self.assertEqual(dataset.contained_documents, [])
+        self.assertEqual(dataset.train_validate_documents, [])
 
         dataset.add_document('1')
         self.assertEqual(dataset.version, 2)
-        self.assertEqual(dataset.contained_documents, ['1'])
+        self.assertEqual(dataset.train_validate_documents, ['1'])
 
         dataset.add_document('2')
         self.assertEqual(dataset.version, 3)
-        self.assertEqual(dataset.contained_documents, ['1', '2'])
+        self.assertEqual(dataset.train_validate_documents, ['1', '2'])
 
         dataset.remove_document('1')
         self.assertEqual(dataset.version, 4)
-        self.assertEqual(dataset.contained_documents, ['2'])
+        self.assertEqual(dataset.train_validate_documents, ['2'])
 
         dataset.remove_document('3')
         self.assertEqual(dataset.version, 5)
-        self.assertEqual(dataset.contained_documents, ['2'])
+        self.assertEqual(dataset.train_validate_documents, ['2'])
 
     def test_index_can_be_updated(self):
         for_document = 'document1'

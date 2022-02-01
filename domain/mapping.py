@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from uuid import uuid4
 
 from eventsourcing.domain import Aggregate, AggregateCreated, AggregateEvent

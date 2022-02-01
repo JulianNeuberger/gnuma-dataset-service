@@ -8,7 +8,8 @@ class Dataset(Aggregate):
     def __init__(self, name, description: Optional[str] = '', field_mappings: Optional[List[UUID]] = None):
         self.name = name
         self.description = description
-        self.contained_documents: List[str] = []
+        self.train_validate_documents: List[str] = []
+        self.test_documents: List[str] = []
 
         if field_mappings is None:
             self.field_mappings: List[UUID] = []
@@ -21,8 +22,11 @@ class Dataset(Aggregate):
     def create(cls, name: str, description: Optional[str]) -> 'Dataset':
         return cls._create(cls.Created, id=uuid4(), name=name, description=description)
 
-    def add_document(self, document_id: str):
-        self.trigger_event(self.DocumentAddedEvent, document_id=document_id, dataset_id=self.id)
+    def add_train_document(self, document_id: List[str]):
+        self.trigger_event(self.TrainDocumentsAddedEvent, document_ids=document_id, dataset_id=self.id)
+
+    def add_test_document(self, document_id: List[str]):
+        self.trigger_event(self.TestDocumentsAddedEvent, document_ids=document_id, dataset_id=self.id)
 
     def remove_document(self, document_id: str, single=True):
         if single:
@@ -52,22 +56,32 @@ class Dataset(Aggregate):
         dataset_id: UUID
 
         def apply(self, dataset: 'Dataset') -> None:
-            if self.document_id in dataset.contained_documents:
-                dataset.contained_documents.remove(self.document_id)
+            if self.document_id in dataset.train_validate_documents:
+                dataset.train_validate_documents.remove(self.document_id)
+            if self.document_id in dataset.test_documents:
+                dataset.test_documents.remove(self.document_id)
 
     class AllDocumentsOfTypeRemovedEvent(AggregateEvent):
         document_id: str
         dataset_id: UUID
 
         def apply(self, dataset: 'Dataset') -> None:
-            dataset.contained_documents = [d for d in dataset.contained_documents if d != self.document_id]
+            dataset.train_validate_documents = [d for d in dataset.train_validate_documents if d != self.document_id]
+            dataset.test_documents = [d for d in dataset.test_documents if d != self.document_id]
 
-    class DocumentAddedEvent(AggregateEvent):
-        document_id: str
+    class TrainDocumentsAddedEvent(AggregateEvent):
+        document_ids: List[str]
         dataset_id: UUID
 
         def apply(self, dataset: 'Dataset') -> None:
-            dataset.contained_documents.append(self.document_id)
+            dataset.train_validate_documents.extend(self.document_ids)
+
+    class TestDocumentsAddedEvent(AggregateEvent):
+        document_ids: List[str]
+        dataset_id: UUID
+
+        def apply(self, dataset: 'Dataset') -> None:
+            dataset.test_documents.extend(self.document_ids)
 
     class MetaDataUpdatedEvent(AggregateEvent):
         name: str
