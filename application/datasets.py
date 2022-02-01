@@ -20,9 +20,14 @@ class Datasets(Application):
         dataset.delete()
         self.save(dataset)
 
-    def add_document(self, dataset_id: UUID, document_id: str):
+    def add_train_document(self, dataset_id: UUID, document_id: str):
         dataset: Dataset = self.repository.get(dataset_id)
-        dataset.add_document(document_id)
+        dataset.add_train_document(document_id)
+        self.save(dataset)
+
+    def add_test_document(self, dataset_id: UUID, document_id: str):
+        dataset: Dataset = self.repository.get(dataset_id)
+        dataset.add_test_document(document_id)
         self.save(dataset)
 
     def remove_document(self, dataset_id: UUID, document_id: str, single=True):

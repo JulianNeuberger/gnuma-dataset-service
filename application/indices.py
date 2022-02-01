@@ -15,9 +15,13 @@ class ByDocumentIndices(ProcessApplication):
     def policy(self, domain_event: AggregateEvent, process_event: ProcessEvent) -> None:
         pass
 
-    @policy.register(Dataset.DocumentAddedEvent)
-    def _add_document_to_index(self, domain_event: Dataset.DocumentAddedEvent, process_event: ProcessEvent):
-        assert isinstance(domain_event, Dataset.DocumentAddedEvent)
+    @policy.register(Dataset.TestDocumentAddedEvent)
+    @policy.register(Dataset.TrainDocumentAddedEvent)
+    def _add_document_to_index(self,
+                               domain_event: Union[Dataset.TrainDocumentAddedEvent, Dataset.TestDocumentAddedEvent],
+                               process_event: ProcessEvent):
+        assert isinstance(domain_event, Dataset.TrainDocumentAddedEvent) or \
+               isinstance(domain_event, Dataset.TestDocumentAddedEvent)
         index_id = ByDocumentIndex.create_id(domain_event.document_id)
         try:
             index: ByDocumentIndex = self.repository.get(index_id)

@@ -4,6 +4,7 @@ from typing import Iterable
 from eventsourcing.application import AggregateNotFound
 from flask import request, jsonify
 from flask_restful import abort, Resource
+from marshmallow import Schema, fields
 
 from interface.service import DatasetsService
 from serializer import serialize_dataset
@@ -67,6 +68,12 @@ class DebugDocumentRemover(Resource):
         })
 
 
+class DatasetQuerySchema(Schema):
+    k_folds = fields.Integer(strict=True, required=False)
+    train_test_split = fields.Float(strict=True, required=False)
+    train_validate_split = fields.Float(strict=True, required=False)
+
+
 class Dataset(Resource):
     def __init__(self, datasets_service: DatasetsService):
         print(f'Initializing API resource {self.__class__.__name__} with dataset service {hex(id(datasets_service))}')
@@ -75,7 +82,13 @@ class Dataset(Resource):
     def get(self, dataset_id):
         dataset = self._datasets_service.get_dataset(dataset_id)
         mappings = self._datasets_service.get_mappings_for_dataset(dataset)
-        return jsonify(serialize_dataset(dataset, mappings).to_dict())
+
+        train_test_split = request.args.get('testSplit', type=float)
+        train_validate_split = request.args.get('validSplit', type=float)
+        k_folds = request.args.get('kFolds', type=int)
+        seed = request.args.get('seed', type=str)
+
+        return jsonify(serialize_dataset(dataset, mappings, k_folds, train_test_split, train_validate_split, seed).to_dict())
 
     def patch(self, dataset_id):
         if not request.is_json:
@@ -88,10 +101,17 @@ class Dataset(Resource):
         except AggregateNotFound:
             return abort(404)
 
-        if 'documents' in body:
-            old_documents = dataset.contained_documents
-            new_documents = body['documents']
-            self._update_documents(dataset_id, new_documents, old_documents)
+        if 'trainDocuments' in body:
+            old_documents = dataset.train_validate_documents
+            new_documents = body['trainDocuments']
+            self._update_documents(dataset_id, new_documents, old_documents,
+                                   self._datasets_service.add_train_document_to_dataset)
+
+        if 'testDocuments' in body:
+            old_documents = dataset.test_documents
+            new_documents = body['testDocuments']
+            self._update_documents(dataset_id, new_documents, old_documents,
+                                   self._datasets_service.add_test_document_to_dataset)
 
         if 'name' in body or 'description' in body:
             name = body.get('name', None)
@@ -99,15 +119,16 @@ class Dataset(Resource):
             self._datasets_service.update_meta(dataset_id, name, description)
 
         dataset = self._datasets_service.get_dataset(dataset_id)
+        mappings = self._datasets_service.get_mappings_for_dataset(dataset)
 
         # TODO: here would be a good time to snapshot (?)
 
-        return jsonify(serialize_dataset(dataset).to_dict())
+        return jsonify(serialize_dataset(dataset, mappings).to_dict())
 
     def delete(self, dataset_id):
         self._datasets_service.delete(dataset_id)
 
-    def _update_documents(self, dataset_id, new_documents, old_documents):
+    def _update_documents(self, dataset_id, new_documents, old_documents, update_method):
         if type(new_documents) is not list:
             abort(400, message='Expected body attribute "documents" to be a list of document ids.')
 
@@ -118,7 +139,7 @@ class Dataset(Resource):
         removed_documents = diff(old_documents, new_documents)
 
         for document in added_documents:
-            self._datasets_service.add_document_to_dataset(dataset_id, document)
+            update_method(dataset_id, document)
 
         for document in removed_documents:
             self._datasets_service.remove_document_from_dataset(dataset_id, document)
@@ -133,7 +154,7 @@ class DatasetList(Resource):
         datasets = self._datasets_service.get_all_datasets()
 
         return jsonify([
-            serialize_dataset(dataset).to_dict()
+            serialize_dataset(dataset, self._datasets_service.get_mappings_for_dataset(dataset)).to_dict()
             for dataset
             in datasets
         ])
@@ -153,9 +174,13 @@ class DatasetList(Resource):
         dataset_id = self._datasets_service.create_dataset(dataset_name, dataset_description)
         dataset_id = dataset_id.hex
 
-        if 'documents' in body:
-            for document in body['documents']:
-                self._datasets_service.add_document_to_dataset(dataset_id, document)
+        if 'trainDocuments' in body:
+            for document in body['trainDocuments']:
+                self._datasets_service.add_train_document_to_dataset(dataset_id, document)
+
+        if 'testDocuments' in body:
+            for document in body['testDocuments']:
+                self._datasets_service.add_test_document_to_dataset(dataset_id, document)
 
         if 'mappings' in body:
             mapping_ids = []
