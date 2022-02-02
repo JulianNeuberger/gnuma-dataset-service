@@ -8,7 +8,7 @@ from flask_restful import Api
 from dispatcher import MessageDispatcher
 from interface.service import DatasetsService
 from messages.listener import AMQPListener
-from resources import Dataset, DatasetList
+from api import Dataset, DatasetList
 from util import logwrapper
 
 if __name__ == '__main__':

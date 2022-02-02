@@ -1,12 +1,14 @@
 from collections import Counter
-from typing import Iterable
+from typing import Iterable, Any, Dict, List
 
 from eventsourcing.application import AggregateNotFound
 from flask import request, jsonify
 from flask_restful import abort, Resource
 from marshmallow import Schema, fields, ValidationError
-from marshmallow.validate import Range
+from marshmallow.validate import Range, Length
 
+from api.schemas import DatasetQuerySchema, DatasetPatchSchema, DatasetCreationSchema
+from domain.dataset import Dataset
 from interface.service import DatasetsService
 from serializer import serialize_dataset
 
@@ -69,13 +71,43 @@ class DebugDocumentRemover(Resource):
         })
 
 
-class DatasetQuerySchema(Schema):
-    k_folds = fields.Integer(strict=False, required=False, data_key='kFolds', validate=Range(min=1))
-    test_split = fields.Float(strict=True, required=False, data_key='testSplit',
-                              validate=Range(min=0.0, max=1.0, min_inclusive=False, max_inclusive=False))
-    validation_split = fields.Float(strict=True, required=False, data_key='validationSplit',
-                                    validate=Range(min=0.0, max=1.0, min_inclusive=False, max_inclusive=False))
-    seed = fields.String(strict=False, required=False,  data_key='seed')
+def update_documents(dataset_id: str, new_documents: List[str], old_documents: List[str],
+                     update_method, datasets_service: DatasetsService):
+    added_documents = diff(new_documents, old_documents)
+    removed_documents = diff(old_documents, new_documents)
+
+    for document in added_documents:
+        update_method(dataset_id, document)
+
+    for document in removed_documents:
+        datasets_service.remove_document_from_dataset(dataset_id, document)
+
+
+def patch_dataset(params: Dict[str, Any], dataset: Dataset, datasets_service: DatasetsService):
+    if 'train_documents' in params:
+        old_documents = dataset.train_validate_documents
+        new_documents = params['train_documents']
+        update_documents(dataset.id.hex, new_documents, old_documents,
+                         datasets_service.add_train_document_to_dataset, datasets_service)
+
+    if 'test_documents' in params:
+        old_documents = dataset.test_documents
+        new_documents = params['test_documents']
+        update_documents(dataset.id.hex, new_documents, old_documents,
+                         datasets_service.add_test_document_to_dataset, datasets_service)
+
+    if 'name' in params or 'description' in params:
+        name = params.get('name', None)
+        description = params.get('description', None)
+        datasets_service.update_meta(dataset.id.hex, name, description)
+
+    if 'mappings' in params:
+        mapping_ids = []
+        for mapping in params['mappings']:
+            mapping_id = datasets_service.create_mapping(mapping['name'], mapping['description'],
+                                                         mapping['aliases'], mapping['tasks'])
+            mapping_ids.append(str(mapping_id))
+        datasets_service.update_mappings(dataset.id.hex, mapping_ids)
 
 
 class Dataset(Resource):
@@ -108,55 +140,27 @@ class Dataset(Resource):
         if not request.is_json:
             return abort_not_json()
 
-        body = request.json
+        try:
+            params = DatasetPatchSchema().load(request.json, unknown='EXCLUDE')
+        except ValidationError as e:
+            return e.messages, 400
 
         try:
             dataset = self._datasets_service.get_dataset(dataset_id)
         except AggregateNotFound:
-            return abort(404)
+            return f'No dataset with id {dataset_id}', 400
 
-        if 'trainDocuments' in body:
-            old_documents = dataset.train_validate_documents
-            new_documents = body['trainDocuments']
-            self._update_documents(dataset_id, new_documents, old_documents,
-                                   self._datasets_service.add_train_document_to_dataset)
+        patch_dataset(params, dataset, self._datasets_service)
 
-        if 'testDocuments' in body:
-            old_documents = dataset.test_documents
-            new_documents = body['testDocuments']
-            self._update_documents(dataset_id, new_documents, old_documents,
-                                   self._datasets_service.add_test_document_to_dataset)
-
-        if 'name' in body or 'description' in body:
-            name = body.get('name', None)
-            description = body.get('description', None)
-            self._datasets_service.update_meta(dataset_id, name, description)
+        # TODO: here would be a good time to snapshot (?)
 
         dataset = self._datasets_service.get_dataset(dataset_id)
         mappings = self._datasets_service.get_mappings_for_dataset(dataset)
-
-        # TODO: here would be a good time to snapshot (?)
 
         return jsonify(serialize_dataset(dataset, mappings).to_dict())
 
     def delete(self, dataset_id):
         self._datasets_service.delete(dataset_id)
-
-    def _update_documents(self, dataset_id, new_documents, old_documents, update_method):
-        if type(new_documents) is not list:
-            abort(400, message='Expected body attribute "documents" to be a list of document ids.')
-
-        if len(new_documents) > 0 and type(new_documents[0]) is not str:
-            abort(400, message='Expected document ids in "documents" to be a list of strings.')
-
-        added_documents = diff(new_documents, old_documents)
-        removed_documents = diff(old_documents, new_documents)
-
-        for document in added_documents:
-            update_method(dataset_id, document)
-
-        for document in removed_documents:
-            self._datasets_service.remove_document_from_dataset(dataset_id, document)
 
 
 class DatasetList(Resource):
@@ -177,30 +181,15 @@ class DatasetList(Resource):
         if not request.is_json:
             return abort_not_json()
 
-        body = request.json
-        if 'name' not in body:
-            return abort_missing_parameter('name')
+        try:
+            params = DatasetCreationSchema().load(request.json, unknown='EXCLUDE')
+        except ValidationError as e:
+            return e.messages, 400
 
-        dataset_name = body['name']
-        dataset_description = ''
-        if 'description' in body:
-            dataset_description = body['description']
-        dataset_id = self._datasets_service.create_dataset(dataset_name, dataset_description)
-        dataset_id = dataset_id.hex
+        dataset_id = self._datasets_service.create_dataset(params['name'], params['description'])
+        dataset = self._datasets_service.get_dataset(dataset_id.hex)
 
-        if 'trainDocuments' in body:
-            self._datasets_service.add_train_documents_to_dataset(dataset_id, body['trainDocuments'])
-
-        if 'testDocuments' in body:
-            self._datasets_service.add_test_documents_to_dataset(dataset_id, body['testDocuments'])
-
-        if 'mappings' in body:
-            mapping_ids = []
-            for mapping in body['mappings']:
-                mapping_id = self._datasets_service.create_mapping(mapping['name'], mapping['description'],
-                                                                   mapping['aliases'], mapping['tasks'])
-                mapping_ids.append(str(mapping_id))
-            self._datasets_service.update_mappings(dataset_id, mapping_ids)
+        patch_dataset(params, dataset, self._datasets_service)
 
         # FIXME: generate uri properly (how?)
         return jsonify({
