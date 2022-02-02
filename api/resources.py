@@ -1,11 +1,10 @@
 from collections import Counter
-from typing import Iterable, Any, Dict, List
+from typing import Iterable, Any, Dict, List, Callable
 
 from eventsourcing.application import AggregateNotFound
 from flask import request, jsonify
 from flask_restful import abort, Resource
-from marshmallow import Schema, fields, ValidationError
-from marshmallow.validate import Range, Length
+from marshmallow import ValidationError
 
 from api.schemas import DatasetQuerySchema, DatasetPatchSchema, DatasetCreationSchema
 from domain.dataset import Dataset
@@ -59,28 +58,13 @@ def diff(a: Iterable, b: Iterable) -> Iterable:
     return list(difference.elements())
 
 
-class DebugDocumentRemover(Resource):
-    def __init__(self, datasets_service: DatasetsService):
-        print(f'Initializing API resource {self.__class__.__name__} with dataset service {hex(id(datasets_service))}')
-        self._datasets_service = datasets_service
-
-    def delete(self, document_id):
-        self._datasets_service.remove_document_from_all_datasets(document_id)
-        return jsonify({
-            'success': True
-        })
-
-
 def update_documents(dataset_id: str, new_documents: List[str], old_documents: List[str],
-                     update_method, datasets_service: DatasetsService):
+                     add_func: Callable[[str, List[str]], None], remove_func: Callable[[str, List[str]], None]):
     added_documents = diff(new_documents, old_documents)
     removed_documents = diff(old_documents, new_documents)
 
-    for document in added_documents:
-        update_method(dataset_id, document)
-
-    for document in removed_documents:
-        datasets_service.remove_document_from_dataset(dataset_id, document)
+    add_func(dataset_id, list(added_documents))
+    remove_func(dataset_id, list(removed_documents))
 
 
 def patch_dataset(params: Dict[str, Any], dataset: Dataset, datasets_service: DatasetsService):
@@ -88,13 +72,15 @@ def patch_dataset(params: Dict[str, Any], dataset: Dataset, datasets_service: Da
         old_documents = dataset.train_validate_documents
         new_documents = params['train_documents']
         update_documents(dataset.id.hex, new_documents, old_documents,
-                         datasets_service.add_train_document_to_dataset, datasets_service)
+                         add_func=datasets_service.add_train_documents_to_dataset,
+                         remove_func=datasets_service.remove_train_documents_from_dataset)
 
     if 'test_documents' in params:
         old_documents = dataset.test_documents
         new_documents = params['test_documents']
         update_documents(dataset.id.hex, new_documents, old_documents,
-                         datasets_service.add_test_document_to_dataset, datasets_service)
+                         add_func=datasets_service.add_test_documents_to_dataset,
+                         remove_func=datasets_service.remove_test_documents_from_dataset)
 
     if 'name' in params or 'description' in params:
         name = params.get('name', None)

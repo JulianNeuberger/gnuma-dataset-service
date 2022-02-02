@@ -20,29 +20,24 @@ class Datasets(Application):
         dataset.delete()
         self.save(dataset)
 
-    def add_train_document(self, dataset_id: UUID, document_id: str):
-        dataset: Dataset = self.repository.get(dataset_id)
-        dataset.add_train_document([document_id])
-        self.save(dataset)
-
     def add_train_documents(self, dataset_id: UUID, document_ids: List[str]):
         dataset: Dataset = self.repository.get(dataset_id)
-        dataset.add_train_document(document_ids)
-        self.save(dataset)
-
-    def add_test_document(self, dataset_id: UUID, document_id: str):
-        dataset: Dataset = self.repository.get(dataset_id)
-        dataset.add_test_document([document_id])
+        dataset.add_train_documents(document_ids)
         self.save(dataset)
 
     def add_test_documents(self, dataset_id: UUID, document_ids: List[str]):
         dataset: Dataset = self.repository.get(dataset_id)
-        dataset.add_test_document(document_ids)
+        dataset.add_test_documents(document_ids)
         self.save(dataset)
 
-    def remove_document(self, dataset_id: UUID, document_id: str, single=True):
+    def remove_train_documents(self, dataset_id: UUID, document_ids: List[str]):
         dataset: Dataset = self.repository.get(dataset_id)
-        dataset.remove_document(document_id, single)
+        dataset.remove_train_documents(document_ids)
+        self.save(dataset)
+
+    def remove_test_documents(self, dataset_id: UUID, document_ids: List[str]):
+        dataset: Dataset = self.repository.get(dataset_id)
+        dataset.remove_test_documents(document_ids)
         self.save(dataset)
 
     def update_meta(self, dataset_id: UUID, name: Optional[str], description: Optional[str]):

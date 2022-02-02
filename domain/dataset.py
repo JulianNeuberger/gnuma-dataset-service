@@ -22,17 +22,17 @@ class Dataset(Aggregate):
     def create(cls, name: str, description: Optional[str]) -> 'Dataset':
         return cls._create(cls.Created, id=uuid4(), name=name, description=description)
 
-    def add_train_document(self, document_id: List[str]):
+    def add_train_documents(self, document_id: List[str]):
         self.trigger_event(self.TrainDocumentsAddedEvent, document_ids=document_id, dataset_id=self.id)
 
-    def add_test_document(self, document_id: List[str]):
+    def add_test_documents(self, document_id: List[str]):
         self.trigger_event(self.TestDocumentsAddedEvent, document_ids=document_id, dataset_id=self.id)
 
-    def remove_document(self, document_id: str, single=True):
-        if single:
-            self.trigger_event(self.SingleDocumentOfTypeRemovedEvent, document_id=document_id, dataset_id=self.id)
-        else:
-            self.trigger_event(self.AllDocumentsOfTypeRemovedEvent, document_id=document_id, dataset_id=self.id)
+    def remove_train_documents(self, document_id: List[str]):
+        self.trigger_event(self.TrainDocumentsRemovedEvent, document_id=document_id, dataset_id=self.id)
+
+    def remove_test_documents(self, document_id: List[str]):
+        self.trigger_event(self.TestDocumentsRemovedEvent, document_id=document_id, dataset_id=self.id)
 
     def update_meta(self, name: str, description: str):
         self.trigger_event(self.MetaDataUpdatedEvent, name=name, description=description)
@@ -51,23 +51,27 @@ class Dataset(Aggregate):
         def apply(self, dataset: 'Dataset') -> None:
             dataset.deleted = True
 
-    class SingleDocumentOfTypeRemovedEvent(AggregateEvent):
-        document_id: str
+    class TrainDocumentsRemovedEvent(AggregateEvent):
+        document_ids: List[str]
         dataset_id: UUID
 
         def apply(self, dataset: 'Dataset') -> None:
-            if self.document_id in dataset.train_validate_documents:
-                dataset.train_validate_documents.remove(self.document_id)
-            if self.document_id in dataset.test_documents:
-                dataset.test_documents.remove(self.document_id)
+            dataset.train_validate_documents = [
+                d
+                for d in dataset.train_validate_documents
+                if d not in self.document_ids
+            ]
 
-    class AllDocumentsOfTypeRemovedEvent(AggregateEvent):
-        document_id: str
+    class TestDocumentsRemovedEvent(AggregateEvent):
+        document_ids: List[str]
         dataset_id: UUID
 
         def apply(self, dataset: 'Dataset') -> None:
-            dataset.train_validate_documents = [d for d in dataset.train_validate_documents if d != self.document_id]
-            dataset.test_documents = [d for d in dataset.test_documents if d != self.document_id]
+            dataset.test_documents = [
+                d
+                for d in dataset.test_documents
+                if d not in self.document_ids
+            ]
 
     class TrainDocumentsAddedEvent(AggregateEvent):
         document_ids: List[str]

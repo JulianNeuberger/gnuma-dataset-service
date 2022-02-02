@@ -88,23 +88,11 @@ class DatasetsService:
         datasets = self._runner.get(Datasets)
         datasets.update_mappings(UUID(dataset_id), mappings)
 
-    def add_train_document_to_dataset(self, dataset_id: str, document_id: str):
-        logwrapper.info(f'Dataset service [{hex(id(self))}]: '
-                        f'Adding train document {document_id} to dataset {dataset_id}...')
-        datasets = self._runner.get(Datasets)
-        datasets.add_train_document(UUID(dataset_id), document_id)
-
     def add_train_documents_to_dataset(self, dataset_id: str, document_ids: List[str]):
         logwrapper.info(f'Dataset service [{hex(id(self))}]: '
                         f'Adding train documents {document_ids} to dataset {dataset_id}...')
         datasets = self._runner.get(Datasets)
         datasets.add_train_documents(UUID(dataset_id), document_ids)
-
-    def add_test_document_to_dataset(self, dataset_id: str, document_id: str):
-        logwrapper.info(f'Dataset service [{hex(id(self))}]: '
-                        f'Adding test document {document_id} to dataset {dataset_id}...')
-        datasets = self._runner.get(Datasets)
-        datasets.add_test_document(UUID(dataset_id), document_id)
 
     def add_test_documents_to_dataset(self, dataset_id: str, document_ids: List[str]):
         logwrapper.info(f'Dataset service [{hex(id(self))}]: '
@@ -112,17 +100,25 @@ class DatasetsService:
         datasets = self._runner.get(Datasets)
         datasets.add_test_documents(UUID(dataset_id), document_ids)
 
-    def remove_document_from_dataset(self, dataset_id: str, document_id: str, single=True):
-        logwrapper.info(f'Dataset service [{hex(id(self))}]: Removing {"one" if single else "all"} '
-                        f'document {document_id} from dataset {dataset_id}...')
+    def remove_train_documents_from_dataset(self, dataset_id: str, document_ids: List[str]):
+        logwrapper.info(f'Dataset service [{hex(id(self))}]: Removing {len(document_ids)} '
+                        f'train documents from dataset {dataset_id}...')
         datasets = self._runner.get(Datasets)
-        datasets.remove_document(UUID(dataset_id), document_id, single=single)
+        datasets.remove_train_documents(UUID(dataset_id), document_ids)
 
-    def remove_document_from_all_datasets(self, document_id: str, single=True):
-        logwrapper.info(f'Dataset service [{hex(id(self))}]: Removing {"one" if single else "all"} '
-                        f'document {document_id} from all datasets...')
+    def remove_test_documents_from_dataset(self, dataset_id: str, document_ids: List[str]):
+        logwrapper.info(f'Dataset service [{hex(id(self))}]: Removing {len(document_ids)} '
+                        f'test documents from dataset {dataset_id}...')
+        datasets = self._runner.get(Datasets)
+        datasets.remove_test_documents(UUID(dataset_id), document_ids)
+
+    def remove_documents_from_all_datasets(self, document_ids: List[str]):
+        logwrapper.info(f'Dataset service [{hex(id(self))}]: Removing {len(document_ids)} '
+                        f'train and test documents from all datasets...')
         indices = self._runner.get(ByDocumentIndices)
         datasets = self._runner.get(Datasets)
-        dataset_ids = indices.get_datasets_by_document(document_id)
-        for dataset_id in dataset_ids:
-            datasets.remove_document(dataset_id, document_id, single=single)
+        for document_id in document_ids:
+            dataset_ids = indices.get_datasets_by_document(document_id)
+            for dataset_id in dataset_ids:
+                datasets.remove_train_documents(dataset_id, [document_id])
+                datasets.remove_test_documents(dataset_id, [document_id])

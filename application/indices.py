@@ -31,13 +31,13 @@ class ByDocumentIndices(ProcessApplication):
             index.add_dataset_to_index(domain_event.dataset_id)
             process_event.save(index)
 
-    @policy.register(Dataset.SingleDocumentOfTypeRemovedEvent)
+    @policy.register(Dataset.TrainDocumentsRemovedEvent)
     @policy.register(Dataset.AllDocumentsOfTypeRemovedEvent)
     def _remove_document_from_index(self,
-                                    domain_event: Union[Dataset.SingleDocumentOfTypeRemovedEvent,
+                                    domain_event: Union[Dataset.TrainDocumentsRemovedEvent,
                                                         Dataset.AllDocumentsOfTypeRemovedEvent],
                                     process_event: ProcessEvent):
-        assert isinstance(domain_event, Dataset.SingleDocumentOfTypeRemovedEvent) or \
+        assert isinstance(domain_event, Dataset.TrainDocumentsRemovedEvent) or \
                isinstance(domain_event, Dataset.AllDocumentsOfTypeRemovedEvent)
         index_id = ByDocumentIndex.create_id(domain_event.document_id)
         try:
