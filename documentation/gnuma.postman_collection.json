@@ -32,7 +32,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"name\": \"Test Dataset\",\r\n  \"description\": \"a simple test\",\r\n  \"mappings\": [\r\n    {\r\n      \"name\": \"ner-tag\",\r\n      \"description\": \"fields used as target for the named entity recognition task\",\r\n      \"tasks\": [\r\n        \"NAMED_ENTITY_RECOGNITION\"\r\n      ],\r\n      \"aliases\": [\r\n        \"ner\",\r\n        \"nertag\",\r\n        \"ner_tag\"\r\n      ]\r\n    }\r\n  ],\r\n  \"testDocuments\": [],\r\n  \"trainDocuments\": [\r\n    \"00\", \"01\", \"02\", \"03\", \"04\", \"05\", \"06\", \"07\", \"08\", \"09\", \r\n    \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\", \"17\", \"18\", \"19\", \r\n    \"20\", \"21\", \"22\", \"23\", \"24\", \"25\", \"26\", \"27\", \"28\", \"29\", \r\n    \"30\", \"31\", \"32\", \"33\", \"34\", \"35\", \"36\", \"37\", \"38\", \"39\", \r\n    \"40\", \"41\", \"42\", \"43\", \"44\", \"45\", \"46\", \"47\", \"48\", \"49\", \r\n    \"50\", \"51\", \"52\", \"53\", \"54\", \"55\", \"56\", \"57\", \"58\", \"59\", \r\n    \"60\", \"61\", \"62\", \"63\", \"64\", \"65\", \"66\", \"67\", \"68\", \"69\", \r\n    \"70\", \"71\", \"72\", \"73\", \"74\", \"75\", \"76\", \"77\", \"78\", \"79\", \r\n    \"80\", \"81\", \"82\", \"83\", \"84\", \"85\", \"86\", \"87\", \"88\", \"89\", \r\n    \"90\", \"91\", \"92\", \"93\", \"94\", \"95\", \"96\", \"97\", \"98\", \"99\"\r\n  ]\r\n}",
+					"raw": "{\r\n  \"name\": \"Test Dataset\",\r\n  \"description\": \"a simple test\",\r\n  \"mappings\": [\r\n    {\r\n      \"name\": \"ner-tag\",\r\n      \"description\": \"fields used as target for the named entity recognition task\",\r\n      \"tasks\": [\r\n        \"NAMED_ENTITY_RECOGNITION\"\r\n      ],\r\n      \"aliases\": [\r\n        \"ner\",\r\n        \"nertag\",\r\n        \"ner_tag\"\r\n      ]\r\n    }\r\n  ],\r\n  \"testDocuments\": [],\r\n  \"trainDocuments\": [\r\n        \"https://example.com/00.txt\", \"https://example.com/01.txt\", \"https://example.com/02.txt\",\r\n    \"https://example.com/03.txt\", \"https://example.com/04.txt\", \"https://example.com/05.txt\",\r\n    \"https://example.com/06.txt\", \"https://example.com/07.txt\", \"https://example.com/08.txt\",\r\n    \"https://example.com/09.txt\", \"https://example.com/10.txt\", \"https://example.com/11.txt\",\r\n    \"https://example.com/12.txt\", \"https://example.com/13.txt\", \"https://example.com/14.txt\",\r\n    \"https://example.com/15.txt\", \"https://example.com/16.txt\", \"https://example.com/17.txt\",\r\n    \"https://example.com/18.txt\", \"https://example.com/19.txt\", \"https://example.com/20.txt\",\r\n    \"https://example.com/21.txt\", \"https://example.com/22.txt\", \"https://example.com/23.txt\",\r\n    \"https://example.com/24.txt\", \"https://example.com/25.txt\", \"https://example.com/26.txt\",\r\n    \"https://example.com/27.txt\", \"https://example.com/28.txt\", \"https://example.com/29.txt\",\r\n    \"https://example.com/30.txt\", \"https://example.com/31.txt\", \"https://example.com/32.txt\",\r\n    \"https://example.com/33.txt\", \"https://example.com/34.txt\", \"https://example.com/35.txt\",\r\n    \"https://example.com/36.txt\", \"https://example.com/37.txt\", \"https://example.com/38.txt\",\r\n    \"https://example.com/39.txt\", \"https://example.com/40.txt\", \"https://example.com/41.txt\",\r\n    \"https://example.com/42.txt\", \"https://example.com/43.txt\", \"https://example.com/44.txt\",\r\n    \"https://example.com/45.txt\", \"https://example.com/46.txt\", \"https://example.com/47.txt\",\r\n    \"https://example.com/48.txt\", \"https://example.com/49.txt\", \"https://example.com/50.txt\",\r\n    \"https://example.com/51.txt\", \"https://example.com/52.txt\", \"https://example.com/53.txt\",\r\n    \"https://example.com/54.txt\", \"https://example.com/55.txt\", \"https://example.com/56.txt\",\r\n    \"https://example.com/57.txt\", \"https://example.com/58.txt\", \"https://example.com/59.txt\",\r\n    \"https://example.com/60.txt\", \"https://example.com/61.txt\", \"https://example.com/62.txt\",\r\n    \"https://example.com/63.txt\", \"https://example.com/64.txt\", \"https://example.com/65.txt\",\r\n    \"https://example.com/66.txt\", \"https://example.com/67.txt\", \"https://example.com/68.txt\",\r\n    \"https://example.com/69.txt\", \"https://example.com/70.txt\", \"https://example.com/71.txt\",\r\n    \"https://example.com/72.txt\", \"https://example.com/73.txt\", \"https://example.com/74.txt\",\r\n    \"https://example.com/75.txt\", \"https://example.com/76.txt\", \"https://example.com/77.txt\",\r\n    \"https://example.com/78.txt\", \"https://example.com/79.txt\", \"https://example.com/80.txt\",\r\n    \"https://example.com/81.txt\", \"https://example.com/82.txt\", \"https://example.com/83.txt\",\r\n    \"https://example.com/84.txt\", \"https://example.com/85.txt\", \"https://example.com/86.txt\",\r\n    \"https://example.com/87.txt\", \"https://example.com/88.txt\", \"https://example.com/89.txt\",\r\n    \"https://example.com/90.txt\", \"https://example.com/91.txt\", \"https://example.com/92.txt\",\r\n    \"https://example.com/93.txt\", \"https://example.com/94.txt\", \"https://example.com/95.txt\",\r\n    \"https://example.com/96.txt\", \"https://example.com/97.txt\", \"https://example.com/98.txt\",\r\n    \"https://example.com/99.txt\"\r\n  ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -60,7 +60,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:5000/api/v1/datasets/:datasetId?kFolds=3&validationSplit=0.2&testSplit=0.3&seed=42",
+					"raw": "localhost:5000/api/v1/datasets/:datasetId?validationSplit=0.2&testSplit=0.3&seed=42",
 					"host": [
 						"localhost"
 					],
@@ -75,7 +75,8 @@
 						{
 							"key": "kFolds",
 							"value": "3",
-							"description": "Number of combinations unique partitioning into train/validation sets accross the dataset, often used in cross-validation.\nMutually exclusive with validationSplit parameter."
+							"description": "Number of combinations unique partitioning into train/validation sets accross the dataset, often used in cross-validation.\nMutually exclusive with validationSplit parameter.",
+							"disabled": true
 						},
 						{
 							"key": "validationSplit",
@@ -96,7 +97,7 @@
 					"variable": [
 						{
 							"key": "datasetId",
-							"value": "3eaa13a1846c44a7918a35bc63dd5c9c",
+							"value": "2d397789-6236-481b-9ab9-06edb0323be4",
 							"description": "Id of the dataset to retrieve."
 						}
 					]
