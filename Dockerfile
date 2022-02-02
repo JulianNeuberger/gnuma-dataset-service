@@ -6,7 +6,7 @@ COPY . /gnuma-dataset-service
 RUN apt-get update
 RUN apt-get -y install libpq-dev gcc
 
-RUN conda env create -f /gnuma-dataset-service/env.yaml
+RUN conda env create -f /gnuma-dataset-service/gnuma-datasetservice-environment.yaml
 SHELL ["conda", "run", "-n", "ai4-document-service", "/bin/bash", "-c"]
 
 EXPOSE 5000
