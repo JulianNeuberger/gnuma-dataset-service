@@ -148,6 +148,8 @@ class Dataset(Resource):
     def delete(self, dataset_id):
         self._datasets_service.delete(dataset_id)
 
+        return 200
+
 
 class DatasetList(Resource):
     def __init__(self, datasets_service: DatasetsService):
