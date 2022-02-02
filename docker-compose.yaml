@@ -1,8 +1,22 @@
 version: "3.9"
 services:
+  db:
+    image: postgres
+    restart: always
+    ports: "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASS}"
+      POSTGRES_DB: "${POSTGRES_DBNAME}"
+    volumes:
+      - type: volume
+        source: gnuma-datasetservice-db
+        target: "${PGDATA}"
+        volume:
+          nocopy: true
   gnuma-dataset-service:
     build: .
     ports:
       - "5000:5000"
-    extra_hosts:
-      - "postgres-db:${POSTGRES_HOST}"
+
+volumes:
+  gnuma-datasetservice-db:

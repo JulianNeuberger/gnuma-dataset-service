@@ -25,11 +25,6 @@ if __name__ == '__main__':
 
     # event sourcing configuration
     os.environ["INFRASTRUCTURE_FACTORY"] = "eventsourcing.postgres:Factory"
-    os.environ["POSTGRES_DBNAME"] = config['postgresql']['database']
-    os.environ["POSTGRES_HOST"] = config['postgresql']['host']
-    os.environ["POSTGRES_PORT"] = config['postgresql']['port']
-    os.environ["POSTGRES_USER"] = config['postgresql']['user']
-    os.environ["POSTGRES_PASSWORD"] = config['postgresql']['pass']
     os.environ["POSTGRES_CONN_MAX_AGE"] = "10"
     os.environ["POSTGRES_PRE_PING"] = "y"
     os.environ["POSTGRES_LOCK_TIMEOUT"] = "5"
@@ -50,10 +45,10 @@ if __name__ == '__main__':
     api.add_resource(DatasetList, '/datasets', resource_class_kwargs={'datasets_service': datasets_service})
 
     listener = AMQPListener(
-        host=config['rabbitmq']['host'],
-        port=int(config['rabbitmq']['port']),
-        username=config['rabbitmq']['user'],
-        password=config['rabbitmq']['pass'],
+        host=os.environ["RABBITMQ_HOST"],
+        port=int(os.environ["RABBITMQ_PORT"]),
+        username=os.environ["RABBITMQ_USER"],
+        password=os.environ["RABBITMQ_PASS"],
         on_message=dispatcher.dispatch
     )
     listener.start()
