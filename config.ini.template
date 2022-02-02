@@ -6,7 +6,7 @@ pass = rabbitmqtest
 
 [postgresql]
 database = ai4eventsourcing
-host = 127.0.0.1
+host = postgres-db
 port = 5432
 user = ai4eventsourcing
 pass = ai4eventsourcing
