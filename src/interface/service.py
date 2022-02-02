@@ -90,13 +90,13 @@ class DatasetsService:
 
     def add_train_documents_to_dataset(self, dataset_id: str, document_ids: List[str]):
         logwrapper.info(f'Dataset service [{hex(id(self))}]: '
-                        f'Adding train documents {document_ids} to dataset {dataset_id}...')
+                        f'Adding {len(document_ids)} train documents to dataset {dataset_id}...')
         datasets = self._runner.get(Datasets)
         datasets.add_train_documents(UUID(dataset_id), document_ids)
 
     def add_test_documents_to_dataset(self, dataset_id: str, document_ids: List[str]):
         logwrapper.info(f'Dataset service [{hex(id(self))}]: '
-                        f'Adding test documents {document_ids} to dataset {dataset_id}...')
+                        f'Adding {len(document_ids)} test documents to dataset {dataset_id}...')
         datasets = self._runner.get(Datasets)
         datasets.add_test_documents(UUID(dataset_id), document_ids)
 

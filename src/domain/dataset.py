@@ -22,17 +22,17 @@ class Dataset(Aggregate):
     def create(cls, name: str, description: Optional[str]) -> 'Dataset':
         return cls._create(cls.Created, id=uuid4(), name=name, description=description)
 
-    def add_train_documents(self, document_id: List[str]):
-        self.trigger_event(self.TrainDocumentsAddedEvent, document_ids=document_id, dataset_id=self.id)
+    def add_train_documents(self, document_ids: List[str]):
+        self.trigger_event(self.TrainDocumentsAddedEvent, document_ids=document_ids, dataset_id=self.id)
 
-    def add_test_documents(self, document_id: List[str]):
-        self.trigger_event(self.TestDocumentsAddedEvent, document_ids=document_id, dataset_id=self.id)
+    def add_test_documents(self, document_ids: List[str]):
+        self.trigger_event(self.TestDocumentsAddedEvent, document_ids=document_ids, dataset_id=self.id)
 
-    def remove_train_documents(self, document_id: List[str]):
-        self.trigger_event(self.TrainDocumentsRemovedEvent, document_id=document_id, dataset_id=self.id)
+    def remove_train_documents(self, document_ids: List[str]):
+        self.trigger_event(self.TrainDocumentsRemovedEvent, document_ids=document_ids, dataset_id=self.id)
 
-    def remove_test_documents(self, document_id: List[str]):
-        self.trigger_event(self.TestDocumentsRemovedEvent, document_id=document_id, dataset_id=self.id)
+    def remove_test_documents(self, document_ids: List[str]):
+        self.trigger_event(self.TestDocumentsRemovedEvent, document_ids=document_ids, dataset_id=self.id)
 
     def update_meta(self, name: str, description: str):
         self.trigger_event(self.MetaDataUpdatedEvent, name=name, description=description)

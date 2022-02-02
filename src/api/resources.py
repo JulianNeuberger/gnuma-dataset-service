@@ -10,6 +10,7 @@ from api.schemas import DatasetQuerySchema, DatasetPatchSchema, DatasetCreationS
 from domain.dataset import Dataset
 from interface.service import DatasetsService
 from serializer import serialize_dataset
+from util import logwrapper
 
 
 def abort_not_json():
@@ -60,24 +61,24 @@ def diff(a: Iterable, b: Iterable) -> Iterable:
 
 def update_documents(dataset_id: str, new_documents: List[str], old_documents: List[str],
                      add_func: Callable[[str, List[str]], None], remove_func: Callable[[str, List[str]], None]):
-    added_documents = diff(new_documents, old_documents)
-    removed_documents = diff(old_documents, new_documents)
+    added_documents = list(diff(new_documents, old_documents))
+    removed_documents = list(diff(old_documents, new_documents))
 
-    add_func(dataset_id, list(added_documents))
-    remove_func(dataset_id, list(removed_documents))
+    add_func(dataset_id, added_documents)
+    remove_func(dataset_id, removed_documents)
 
 
 def patch_dataset(params: Dict[str, Any], dataset: Dataset, datasets_service: DatasetsService):
-    if 'train_documents' in params:
+    if 'train_data' in params:
         old_documents = dataset.train_validate_documents
-        new_documents = params['train_documents']
+        new_documents = params['train_data']
         update_documents(dataset.id.hex, new_documents, old_documents,
                          add_func=datasets_service.add_train_documents_to_dataset,
                          remove_func=datasets_service.remove_train_documents_from_dataset)
 
-    if 'test_documents' in params:
+    if 'test_data' in params:
         old_documents = dataset.test_documents
-        new_documents = params['test_documents']
+        new_documents = params['test_data']
         update_documents(dataset.id.hex, new_documents, old_documents,
                          add_func=datasets_service.add_test_documents_to_dataset,
                          remove_func=datasets_service.remove_test_documents_from_dataset)
@@ -98,7 +99,8 @@ def patch_dataset(params: Dict[str, Any], dataset: Dataset, datasets_service: Da
 
 class Dataset(Resource):
     def __init__(self, datasets_service: DatasetsService):
-        print(f'Initializing API resource {self.__class__.__name__} with dataset service {hex(id(datasets_service))}')
+        logwrapper.info(f'Initializing API resource {self.__class__.__name__} '
+                        f'with dataset service {hex(id(datasets_service))}')
         self._datasets_service = datasets_service
 
     def get(self, dataset_id):
@@ -153,7 +155,8 @@ class Dataset(Resource):
 
 class DatasetList(Resource):
     def __init__(self, datasets_service: DatasetsService):
-        print(f'Initializing API resource {self.__class__.__name__} with dataset service {hex(id(datasets_service))}')
+        logwrapper.info(f'Initializing API resource {self.__class__.__name__} with '
+                        f'dataset service {hex(id(datasets_service))}')
         self._datasets_service = datasets_service
 
     def get(self):
