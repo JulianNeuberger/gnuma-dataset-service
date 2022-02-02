@@ -1,5 +1,6 @@
 import configparser
 import os
+from pathlib import Path
 
 from flask import Flask
 from flask_cors import CORS
@@ -13,7 +14,8 @@ from util import logwrapper
 
 if __name__ == '__main__':
     config = configparser.ConfigParser()
-    config_location = f'{os.path.dirname(os.path.abspath(__file__))}{os.path.sep}config.ini'
+    root_folder = Path(os.path.abspath(__file__)).parent.parent
+    config_location = f'{root_folder}{os.path.sep}config.ini'
     if not os.path.exists(config_location):
         logwrapper.error(f'No config file at {config_location}. Make sure to copy config.ini.template to config.ini '
                          f'and adjust it according to your environment.')
