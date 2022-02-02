@@ -56,7 +56,7 @@ if __name__ == '__main__':
     )
     listener.start()
 
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True, use_reloader=False, host='0.0.0.0')
 
     listener.stop()
     listener.join()

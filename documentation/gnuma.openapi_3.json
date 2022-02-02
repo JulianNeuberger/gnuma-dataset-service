@@ -1,0 +1,292 @@
+{
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "http://example.com",
+      "description": "",
+      "variables": {}
+    }
+  ],
+  "info": {
+    "version": "95d5a645-4410-45f3-a475-3830dcda3403",
+    "title": "gnuma",
+    "description": "",
+    "termsOfService": "",
+    "contact": {},
+    "license": {
+      "name": ""
+    }
+  },
+  "paths": {
+    "/api/v1/datasets": {
+      "get": {
+        "summary": "list datasets",
+        "operationId": "listdatasets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      },
+      "post": {
+        "summary": "create dataset",
+        "operationId": "createdataset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string",
+                "example": {
+                  "name": "Test Dataset",
+                  "description": "a simple test",
+                  "mappings": [
+                    {
+                      "name": "ner-tag",
+                      "description": "fields used as target for the named entity recognition task",
+                      "tasks": [
+                        "NAMED_ENTITY_RECOGNITION"
+                      ],
+                      "aliases": [
+                        "ner",
+                        "nertag",
+                        "ner_tag"
+                      ]
+                    }
+                  ],
+                  "testDocuments": [],
+                  "trainDocuments": [
+                    "00",
+                    "01",
+                    "02",
+                    "03",
+                    "04",
+                    "05",
+                    "06",
+                    "07",
+                    "08",
+                    "09",
+                    "10",
+                    "11",
+                    "12",
+                    "13",
+                    "14",
+                    "15",
+                    "16",
+                    "17",
+                    "18",
+                    "19",
+                    "20",
+                    "21",
+                    "22",
+                    "23",
+                    "24",
+                    "25",
+                    "26",
+                    "27",
+                    "28",
+                    "29",
+                    "30",
+                    "31",
+                    "32",
+                    "33",
+                    "34",
+                    "35",
+                    "36",
+                    "37",
+                    "38",
+                    "39",
+                    "40",
+                    "41",
+                    "42",
+                    "43",
+                    "44",
+                    "45",
+                    "46",
+                    "47",
+                    "48",
+                    "49",
+                    "50",
+                    "51",
+                    "52",
+                    "53",
+                    "54",
+                    "55",
+                    "56",
+                    "57",
+                    "58",
+                    "59",
+                    "60",
+                    "61",
+                    "62",
+                    "63",
+                    "64",
+                    "65",
+                    "66",
+                    "67",
+                    "68",
+                    "69",
+                    "70",
+                    "71",
+                    "72",
+                    "73",
+                    "74",
+                    "75",
+                    "76",
+                    "77",
+                    "78",
+                    "79",
+                    "80",
+                    "81",
+                    "82",
+                    "83",
+                    "84",
+                    "85",
+                    "86",
+                    "87",
+                    "88",
+                    "89",
+                    "90",
+                    "91",
+                    "92",
+                    "93",
+                    "94",
+                    "95",
+                    "96",
+                    "97",
+                    "98",
+                    "99"
+                  ]
+                }
+              },
+              "example": "{\r\n  \"name\": \"Test Dataset\",\r\n  \"description\": \"a simple test\",\r\n  \"mappings\": [\r\n    {\r\n      \"name\": \"ner-tag\",\r\n      \"description\": \"fields used as target for the named entity recognition task\",\r\n      \"tasks\": [\r\n        \"NAMED_ENTITY_RECOGNITION\"\r\n      ],\r\n      \"aliases\": [\r\n        \"ner\",\r\n        \"nertag\",\r\n        \"ner_tag\"\r\n      ]\r\n    }\r\n  ],\r\n  \"testDocuments\": [],\r\n  \"trainDocuments\": [\r\n    \"00\", \"01\", \"02\", \"03\", \"04\", \"05\", \"06\", \"07\", \"08\", \"09\", \r\n    \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\", \"17\", \"18\", \"19\", \r\n    \"20\", \"21\", \"22\", \"23\", \"24\", \"25\", \"26\", \"27\", \"28\", \"29\", \r\n    \"30\", \"31\", \"32\", \"33\", \"34\", \"35\", \"36\", \"37\", \"38\", \"39\", \r\n    \"40\", \"41\", \"42\", \"43\", \"44\", \"45\", \"46\", \"47\", \"48\", \"49\", \r\n    \"50\", \"51\", \"52\", \"53\", \"54\", \"55\", \"56\", \"57\", \"58\", \"59\", \r\n    \"60\", \"61\", \"62\", \"63\", \"64\", \"65\", \"66\", \"67\", \"68\", \"69\", \r\n    \"70\", \"71\", \"72\", \"73\", \"74\", \"75\", \"76\", \"77\", \"78\", \"79\", \r\n    \"80\", \"81\", \"82\", \"83\", \"84\", \"85\", \"86\", \"87\", \"88\", \"89\", \r\n    \"90\", \"91\", \"92\", \"93\", \"94\", \"95\", \"96\", \"97\", \"98\", \"99\"\r\n  ]\r\n}"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/datasets/{datasetId}": {
+      "get": {
+        "summary": "get dataset",
+        "operationId": "getdataset",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kFolds"
+          },
+          {
+            "$ref": "#/components/parameters/validationSplit"
+          },
+          {
+            "$ref": "#/components/parameters/testSplit"
+          },
+          {
+            "$ref": "#/components/parameters/seed"
+          },
+          {
+            "$ref": "#/components/parameters/datasetId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete dataset",
+        "operationId": "deletedataset",
+        "parameters": [
+          {
+            "name": "datasetId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "3eaa13a1846c44a7918a35bc63dd5c9c"
+            },
+            "description": "Id of the dataset which should be deleted."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "kFolds": {
+        "name": "kFolds",
+        "in": "query",
+        "required": true,
+        "style": "form",
+        "schema": {
+          "type": "number"
+        },
+        "description": "Number of combinations unique partitioning into train/validation sets accross the dataset, often used in cross-validation.\nMutually exclusive with validationSplit parameter."
+      },
+      "validationSplit": {
+        "name": "validationSplit",
+        "in": "query",
+        "required": true,
+        "style": "form",
+        "schema": {
+          "type": "number"
+        },
+        "description": "Ratio of training data reserved for validating the model during training.\nMutually exclusive with kFolds parameter."
+      },
+      "testSplit": {
+        "name": "testSplit",
+        "in": "query",
+        "required": true,
+        "style": "form",
+        "schema": {
+          "type": "number"
+        },
+        "description": "Ratio of training data reserved for testing the model after training. \nCan only be set, if the dataset has no predefined test data, i.e. testDocuments is an empty list."
+      },
+      "seed": {
+        "name": "seed",
+        "in": "query",
+        "required": true,
+        "style": "form",
+        "schema": {
+          "type": "number"
+        },
+        "description": "Seed used in random operations, e.g. shuffling the dataset. \nSet to get the same splits during multiple calls to the service."
+      },
+      "datasetId": {
+        "name": "datasetId",
+        "in": "path",
+        "required": true,
+        "style": "simple",
+        "schema": {
+          "type": "string",
+          "example": "3eaa13a1846c44a7918a35bc63dd5c9c"
+        },
+        "description": "Id of the dataset to retrieve."
+      }
+    }
+  },
+  "security": [],
+  "tags": [],
+  "externalDocs": {
+    "url": "",
+    "description": ""
+  },
+  "warnings": []
+}
