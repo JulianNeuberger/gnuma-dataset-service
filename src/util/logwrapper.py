@@ -1,5 +1,7 @@
 import logging
 
+logging.basicConfig(level=logging.INFO)
+
 
 def debug(message: str):
     logging.debug(message)
