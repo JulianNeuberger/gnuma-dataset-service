@@ -11,6 +11,6 @@ SHELL ["conda", "run", "-n", "ai4-document-service", "/bin/bash", "-c"]
 
 EXPOSE 5000
 
-WORKDIR /gnuma-dataset-service
+WORKDIR /gnuma-dataset-service/src
 
 ENTRYPOINT ["conda", "run", "-n", "ai4-document-service", "python3", "server.py"]

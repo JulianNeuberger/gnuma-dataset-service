@@ -16,9 +16,10 @@
 3. Setup a PostgreSQL user named e.g. `ai4eventsourcing` with password `ai4eventsourcing` ([see instructions](https://www.postgresql.org/docs/8.0/sql-createuser.html))
 4. Setup a database e.g. named `ai4eventsourcing` (see [here](https://www.postgresql.org/docs/9.0/sql-createdatabase.html))
 5. Grant permissions to the user created in step 3 to database created in step 4, run `GRANT ALL PRIVILEGES ON DATABASE ai4eventsourcing to ai4eventsourcing;`
-6. Build docker image via `docker build -t gnuma-dataset-service:latest .` (run in root directory of this project)
-7. Get the ip of your machine (`ipconfig /all` on Win, `ifconfig -a` on Unix) and note it down
-8. Run docker image with `docker run -it -p 5000:5000 --add-host postgres-db:<ip from step 7> gnuma-dataset-service`
+6. Get the ip of your machine (`ipconfig /all` on Win, `ifconfig -a` on Unix) and note it down
+7. Set the environment variable `POSTGRES_HOST` to the ip from step 6
+8. Start the project by running `docker compose up` in the projects root folder 
+   (still in the same command line from step 7)
 
 ### Manual setup
 

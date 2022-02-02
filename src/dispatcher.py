@@ -18,6 +18,6 @@ class MessageDispatcher:
             body = body.decode('utf-8')
             body = json.loads(body)
             document_id = body['id']
-            self._datasets_service.remove_document_from_all_datasets(document_id, single=False)
+            self._datasets_service.remove_documents_from_all_datasets([document_id])
         # TODO: should we always acknowledge the message, even if it was not handled properly?
         channel.basic_ack(delivery_tag=method.delivery_tag)

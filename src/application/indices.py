@@ -31,21 +31,22 @@ class ByDocumentIndices(ProcessApplication):
             index.add_dataset_to_index(domain_event.dataset_id)
             process_event.save(index)
 
-    @policy.register(Dataset.SingleDocumentOfTypeRemovedEvent)
-    @policy.register(Dataset.AllDocumentsOfTypeRemovedEvent)
+    @policy.register(Dataset.TrainDocumentsRemovedEvent)
+    @policy.register(Dataset.TestDocumentsRemovedEvent)
     def _remove_document_from_index(self,
-                                    domain_event: Union[Dataset.SingleDocumentOfTypeRemovedEvent,
-                                                        Dataset.AllDocumentsOfTypeRemovedEvent],
+                                    domain_event: Union[Dataset.TrainDocumentsRemovedEvent,
+                                                        Dataset.TestDocumentsRemovedEvent],
                                     process_event: ProcessEvent):
-        assert isinstance(domain_event, Dataset.SingleDocumentOfTypeRemovedEvent) or \
-               isinstance(domain_event, Dataset.AllDocumentsOfTypeRemovedEvent)
-        index_id = ByDocumentIndex.create_id(domain_event.document_id)
-        try:
-            index: ByDocumentIndex = self.repository.get(index_id)
-            index.remove_dataset_from_index(domain_event.dataset_id)
-            process_event.save(index)
-        except AggregateNotFound:
-            return
+        assert isinstance(domain_event, Dataset.TrainDocumentsRemovedEvent) or \
+               isinstance(domain_event, Dataset.TestDocumentsRemovedEvent)
+        for document_id in domain_event.document_ids:
+            index_id = ByDocumentIndex.create_id(document_id)
+            try:
+                index: ByDocumentIndex = self.repository.get(index_id)
+                index.remove_dataset_from_index(domain_event.dataset_id)
+                process_event.save(index)
+            except AggregateNotFound:
+                continue
 
     def create_index(self, document_id: str) -> UUID:
         index = ByDocumentIndex.create(document_id)
