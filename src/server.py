@@ -5,10 +5,10 @@ from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
 
+from api.resources import Dataset, DatasetList
 from dispatcher import MessageDispatcher
 from interface.service import DatasetsService
 from messages.listener import AMQPListener
-from api import Dataset, DatasetList
 from util import logwrapper
 
 if __name__ == '__main__':
