@@ -1,8 +1,28 @@
 version: "3.9"
 services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    env_file:
+      - .env
+    volumes:
+      - type: volume
+        source: gnuma-datasetservice-db
+        target: "${PGDATA}"
+        volume:
+          nocopy: true
+      - ./scripts/10-init.sh:/docker-entrypoint-initdb.d/10-init.sh
   gnuma-dataset-service:
     build: .
     ports:
       - "5000:5000"
-    extra_hosts:
-      - "postgres-db:${POSTGRES_HOST}"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  gnuma-datasetservice-db:
