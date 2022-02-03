@@ -13,22 +13,20 @@ from messages.listener import AMQPListener
 from util import logwrapper
 
 if __name__ == '__main__':
-    config = configparser.ConfigParser()
-    root_folder = Path(os.path.abspath(__file__)).parent.parent
-    config_location = f'{root_folder}{os.path.sep}config.ini'
-    if not os.path.exists(config_location):
-        logwrapper.error(f'No config file at {config_location}. Make sure to copy config.ini.template to config.ini '
-                         f'and adjust it according to your environment.')
-        raise ValueError(f'No config file found at {config_location}')
-    logwrapper.warning(f'Reading configuration from {config_location}')
-    config.read(config_location)
-
     # event sourcing configuration
     os.environ["INFRASTRUCTURE_FACTORY"] = "eventsourcing.postgres:Factory"
+    os.environ["POSTGRES_DBNAME"] = os.environ["GNUMA_DB_NAME"]
+    os.environ["POSTGRES_HOST"] = os.environ["GNUMA_DB_HOST"]
+    os.environ["POSTGRES_PORT"] = os.environ["GNUMA_DB_PORT"]
+    os.environ["POSTGRES_USER"] = os.environ["GNUMA_DB_USER"]
+    os.environ["POSTGRES_PASSWORD"] = os.environ["GNUMA_DB_PASS"]
     os.environ["POSTGRES_CONN_MAX_AGE"] = "10"
     os.environ["POSTGRES_PRE_PING"] = "y"
     os.environ["POSTGRES_LOCK_TIMEOUT"] = "5"
     os.environ["POSTGRES_IDLE_IN_TRANSACTION_SESSION_TIMEOUT"] = "5"
+
+    logwrapper.info(f'Will connect to database {os.environ["POSTGRES_DBNAME"]} '
+                    f'at postgres://{os.environ["POSTGRES_HOST"]}:{os.environ["POSTGRES_PORT"]}')
 
     app = Flask(__name__)
     cors = CORS(app, resources={
