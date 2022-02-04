@@ -14,8 +14,7 @@
 2. Copy the `.env.template` file to `.env` and at least set the password 
    for the `RABBITMQ_PASS` variable (found in slides),
    adjust other parameters to your liking.  
-3. Start the project by running `docker compose up` in the projects root folder 
-   (still in the same command line from step 7)
+3. Start the project by running `docker compose up` in the projects root folder.
 
 ## Usage
 
